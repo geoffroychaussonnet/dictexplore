@@ -95,32 +95,25 @@ class DictExplore():
     def _recursive_print(self, obj, tabs=""):
         # Display the tree of the nested object.
 
-        for il, (k,v) in enumerate(get_iterator(obj)):
+        for il, (k, v) in enumerate(get_iterator(obj)):
 
             if il > self._max_print_elems:
                 print("%s..." % (tabs))
                 break
 
-            further = True
-            if self.is_handled(v):
+            if self.is_iterable(v):
                 s = type(v)
-            else:
-                # We don't want to recurse further (text or number)
-                further = False
-                s = ""
-
-            print("%s%s:%s" % (tabs, k, s), end="")
-
-            if further:
+                print("%s%s:%s" % (tabs, k, s))
                 loc_ind = "|" + " " * (len(k))
-                print()
                 self._recursive_print(obj=v, tabs=tabs + loc_ind)
             else:
-                print(v)
+                # We don't want to recurse further (text or number)
+                print("%s%s:" % (tabs, k), v)
+
 
     ############################# RANDOM GENERATION #############################
-    def random_generation(self, max_level, fields_per_level=5):
-        self._max_gen_elems = fields_per_level
+    def random_generation(self, max_level, max_elem_per_level=5):
+        self._max_gen_elems = max_elem_per_level
         self._max_gen_levels = max_level
 
         if self._wl is None:
@@ -131,8 +124,6 @@ class DictExplore():
 
     def _random_generation(self, level=0):
         # level: level of recursion
-        # max_gen_levels: max depth
-        # field per level: number of field per level, randomly dran
 
         if level == self._max_gen_levels:
             return self._random_leaf()
@@ -141,7 +132,7 @@ class DictExplore():
             if ty == 0:
                 dico = {}
                 for i in range(rnd.randint(1,self._max_gen_elems)):
-                    dico["L%i_F%i" %(level,i)] = self._random_generation(level+1)
+                    dico["L%i_E%i" %(level,i)] = self._random_generation(level+1)
                 return dico
             elif ty == 1:
                 liste = []
@@ -181,12 +172,8 @@ class DictExplore():
             return rnd.choice(self._wl)
 
     ################ CLASS HELPERS #############
-    def is_handled(self, v):
+    def is_iterable(self, v):
         return np.asarray([isinstance(v, t) for t in self.handled_types]).any()
-        # for t in self.handled_types:
-        #     if isinstance(v,t):
-        #         return True
-        # return False
 
 
 ############################# HELPER FUNCTIONS #############################
@@ -220,7 +207,7 @@ def boldize(txt, k):
 
 if __name__ == "__main__":
 
-    dico = DictExplore().random_generation(5, fields_per_level=10)
+    dico = DictExplore().random_generation(5, max_elem_per_level=10)
     dx = DictExplore(dico)
     dx.display()
 
