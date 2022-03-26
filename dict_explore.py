@@ -10,8 +10,10 @@ class DictExplore():
 
         self._eq = self._null_function
 
+        self.handled_types = [list, dict, np.ndarray]
+
         self._max_print_elems = 5
-        self._fields_per_level = 5
+        self._max_gen_elems = 5
         self._max_gen_levels = 5
 
         # Word list
@@ -53,8 +55,10 @@ class DictExplore():
     def _find_str_in_key(self, obj, key, path=[]):
         for (k, v) in get_iterator(obj):
             if self._eq(key, k):
-                printpath = [p if p.isdigit() else "'"+p+"'" for p in (path+[k])]
-                print("#### Key '%s' was found in [%s] ####" %(key, "][".join(printpath)))
+                pathtxt = "][".join([p if p.isdigit() else "'"+p+"'" for p in (path+[k])])
+                pathtxt = boldize(pathtxt,key)
+                text = "#### Key '%s' was found in [%s] ####" %(key, pathtxt)
+                print(text)
                 if isinstance(v, numbers.Number) or isinstance(v,str):
                     print(v)
                     self.res_find_key.append(v)
@@ -98,14 +102,12 @@ class DictExplore():
                 break
 
             further = True
-            s=""
-            # If we want to iterate recursively (dict, list, ndarray)
-            if   isinstance(v, dict): s="Dict"
-            elif isinstance(v, list): s="List"
-            elif isinstance(v, np.ndarray): s="NpArray"
+            if self.is_handled(v):
+                s = type(v)
             else:
                 # We don't want to recurse further (text or number)
                 further = False
+                s = ""
 
             print("%s%s:%s" % (tabs, k, s), end="")
 
@@ -118,7 +120,7 @@ class DictExplore():
 
     ############################# RANDOM GENERATION #############################
     def random_generation(self, max_level, fields_per_level=5):
-        self._fields_per_level = fields_per_level
+        self._max_gen_elems = fields_per_level
         self._max_gen_levels = max_level
 
         if self._wl is None:
@@ -133,32 +135,59 @@ class DictExplore():
         # field per level: number of field per level, randomly dran
 
         if level == self._max_gen_levels:
-            ty = rnd.randint(3)
-            if ty == 0:
-                return rnd.random(rnd.randint(1,5))
-            elif ty == 1:
-                n = rnd.randint(1,5)
-                return {self._wl[rnd.randint(self._Nwl)]:self._wl[rnd.randint(self._Nwl)] for i in range(n)}
-            elif ty == 2:
-                return rnd.randint(1,5)
+            return self._random_leaf()
         else:
             ty = rnd.randint(3)
             if ty == 0:
                 dico = {}
-                for i in range(rnd.randint(1,self._fields_per_level)):
+                for i in range(rnd.randint(1,self._max_gen_elems)):
                     dico["L%i_F%i" %(level,i)] = self._random_generation(level+1)
                 return dico
             elif ty == 1:
                 liste = []
-                for i in range(rnd.randint(1, self._fields_per_level)):
+                for i in range(rnd.randint(1, self._max_gen_elems)):
                     elem = self._random_generation(level + 1)
                     liste.append(elem)
                 return liste
             elif ty == 2:
-                array = np.zeros(rnd.randint(1, self._fields_per_level), dtype=object)
+                array = np.zeros(rnd.randint(1, self._max_gen_elems), dtype=object)
                 for i in range(len(array)):
                     array[i] = self._random_generation(level + 1)
                 return array
+
+    def _random_leaf(self):
+        ty = rnd.randint(4)
+        if ty == 0:
+            return rnd.random(rnd.randint(1, 5))
+        elif ty == 1:
+            n = rnd.randint(1, self._max_gen_elems)
+            keys = rnd.choice(self._wl, n)
+            vals = [self._random_scalar() for i in range(n)]
+            return {k:v for k,v in zip(keys,vals)}
+        elif ty == 2:
+            return rnd.random(rnd.randint(1, 5)).tolist()
+        elif ty == 3:
+            return rnd.randint(1, 5)
+
+    def _random_scalar(self):
+        ty = rnd.randint(4)
+        if ty == 0:
+            return rnd.random()
+        elif ty == 1:
+            return int(rnd.random()*1e9)
+        elif ty == 2:
+            return True
+        elif ty == 3:
+            return rnd.choice(self._wl)
+
+    ################ CLASS HELPERS #############
+    def is_handled(self, v):
+        return np.asarray([isinstance(v, t) for t in self.handled_types]).any()
+        # for t in self.handled_types:
+        #     if isinstance(v,t):
+        #         return True
+        # return False
+
 
 ############################# HELPER FUNCTIONS #############################
 def get_iterator(obj):
@@ -184,6 +213,10 @@ def return_only_number_or_text(v):
     else:
         # raise TypeError("The value linked to the key %s is neither a number nor a string." %(k))
         return type(v)
+
+def boldize(txt, k):
+    return txt.replace(k,'\033[1m'+k+'\033[0m')
+
 
 if __name__ == "__main__":
 
