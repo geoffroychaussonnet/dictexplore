@@ -76,11 +76,6 @@ class DictExplore():
         for (k, v) in get_iterator(obj):
             if self._eq(key, k):
                 self.res_get_val[k] = return_only_number_or_text(v)
-                # if isinstance(v, numbers.Number) or isinstance(v,str):
-                #     self.res_get_val[k] = v
-                # else:
-                #     #raise TypeError("The value linked to the key %s is neither a number nor a string." %(k))
-                #     self.res_get_val[k] = type(v)
             else:
                 self._search_val_of_key(v,key, path=path.copy() + [k])
 
