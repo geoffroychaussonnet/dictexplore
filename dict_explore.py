@@ -1,6 +1,7 @@
 import numpy as np
 import numbers
 from numpy import random as rnd
+from typing import List, Dict
 
 
 class DictExplore():
@@ -10,7 +11,7 @@ class DictExplore():
 
         self._eq = self._null_function
 
-        self.handled_types = [list, dict, np.ndarray]
+        self.handled_types = (List, Dict, np.ndarray)
 
         self._max_print_elems = 5
         self._max_gen_elems = 5
@@ -38,9 +39,9 @@ class DictExplore():
 
     def _choose_comparison(self, exact):
         if exact:
-            self._eq = DictExplore()._strictly_equal
+            self._eq = DictExplore._strictly_equal
         else:
-            self._eq = DictExplore()._a_in_b
+            self._eq = DictExplore._a_in_b
 
     ############################# GET KEY #############################
     def find_key(self, key, exact=False, get=False):
@@ -57,7 +58,8 @@ class DictExplore():
             if self._eq(key, k):
                 pathtxt = "][".join([p if p.isdigit() else "'"+p+"'" for p in (path+[k])])
                 pathtxt = boldize(pathtxt,key)
-                text = "#### Key '%s' was found in [%s] ####" %(key, pathtxt)
+                ##text = "#### Key '%s' was found in [%s] ####" %(key, pathtxt)
+                text = f"#### Key '{key}' was found in [{pathtxt}] ####"
                 print(text)
                 if isinstance(v, numbers.Number) or isinstance(v,str):
                     print(v)
@@ -67,7 +69,7 @@ class DictExplore():
                         print("Key: ", k2, " -- Value: ", return_only_number_or_text(v2))
                         self.res_find_key.append({k2:v2})
             else:
-                self._find_str_in_key(v,key, path=path.copy() + [k])
+                self._find_str_in_key(v,key, path=path + [k])
 
     ############################# GET VAL #############################
     def get_val(self, key, exact=False):
@@ -101,7 +103,7 @@ class DictExplore():
                 print("%s..." % (tabs))
                 break
 
-            if self.is_iterable(v):
+            if isinstance(v, self.handled_types):
                 s = type(v)
                 print("%s%s:%s" % (tabs, k, s))
                 loc_ind = "|" + " " * (len(k))
@@ -170,10 +172,6 @@ class DictExplore():
             return True
         elif ty == 3:
             return rnd.choice(self._wl)
-
-    ################ CLASS HELPERS #############
-    def is_iterable(self, v):
-        return np.asarray([isinstance(v, t) for t in self.handled_types]).any()
 
 
 ############################# HELPER FUNCTIONS #############################
