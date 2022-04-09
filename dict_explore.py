@@ -49,7 +49,7 @@ class DictExplore():
         self._choose_comparison(exact)
         self._find_str_in_key(self.d, key)
         if len(self.res_find_key) == 0:
-            print("Key was %s not found" %key)
+            print(f"Key was {key} not found")
         if get:
             return self.res_find_key
 
@@ -66,7 +66,7 @@ class DictExplore():
                     self.res_find_key.append(v)
                 else:
                     for k2,v2 in get_iterator(v):
-                        print("Key: ", k2, " -- Value: ", return_only_number_or_text(v2))
+                        print(f"Key: {k2}, -- Value: {return_only_number_or_text(v2)}")
                         self.res_find_key.append({k2:v2})
             else:
                 self._find_str_in_key(v,key, path=path + [k])
@@ -91,7 +91,7 @@ class DictExplore():
         
         self._max_print_elems = max_print_elems
 
-        print("Root object type:", type(obj))
+        print(f"Root object type: {type(obj)}")
         self._recursive_print(obj, "")
 
     def _recursive_print(self, obj, tabs=""):
@@ -100,17 +100,17 @@ class DictExplore():
         for il, (k, v) in enumerate(get_iterator(obj)):
 
             if il > self._max_print_elems:
-                print("%s..." % (tabs))
+                print(f"{tabs}...")
                 break
 
             if isinstance(v, self.handled_types):
                 s = type(v)
-                print("%s%s:%s" % (tabs, k, s))
+                print(f"{tabs}{k}:{s}")
                 loc_ind = "|" + " " * (len(k))
                 self._recursive_print(obj=v, tabs=tabs + loc_ind)
             else:
                 # We don't want to recurse further (text or number)
-                print("%s%s:" % (tabs, k), v)
+                print(f"{tabs}{k}: {v}")
 
 
     ############################# RANDOM GENERATION #############################
@@ -134,7 +134,7 @@ class DictExplore():
             if ty == 0:
                 dico = {}
                 for i in range(rnd.randint(1,self._max_gen_elems)):
-                    dico["L%i_E%i" %(level,i)] = self._random_generation(level+1)
+                    dico[f"L{level}_E{i}"] = self._random_generation(level+1)
                 return dico
             elif ty == 1:
                 liste = []
