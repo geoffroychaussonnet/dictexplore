@@ -47,29 +47,35 @@ class DictExplore():
     def find_key(self, key, exact=False, get=False):
         self.res_find_key = []
         self._choose_comparison(exact)
-        self._find_str_in_key(self.d, key)
-        if len(self.res_find_key) == 0:
-            print(f"Key was {key} not found")
-        if get:
-            return self.res_find_key
+        results = self._find_str_in_key(self.d, key)
+        for ire, res in enumerate(results):
+            print(ire, res)
+        print("Done")
+        # if len(self.res_find_key) == 0:
+        #     print(f"Key was {key} not found")
+        # if get:
+        #     return self.res_find_key
 
     def _find_str_in_key(self, obj, key, path=[]):
         for (k, v) in get_iterator(obj):
+            print(key, path, k, self._eq(key, k))
             if self._eq(key, k):
-                pathtxt = "][".join([p if p.isdigit() else "'"+p+"'" for p in (path+[k])])
-                pathtxt = boldize(pathtxt,key)
-                ##text = "#### Key '%s' was found in [%s] ####" %(key, pathtxt)
+                pathtxt = "][".join([p if p.isdigit() else f"'{p}'" for p in (path+[k])])
+                pathtxt = boldize(pathtxt, key)
                 text = f"#### Key '{key}' was found in [{pathtxt}] ####"
                 print(text)
-                if isinstance(v, numbers.Number) or isinstance(v,str):
-                    print(v)
-                    self.res_find_key.append(v)
-                else:
-                    for k2,v2 in get_iterator(v):
-                        print(f"Key: {k2}, -- Value: {return_only_number_or_text(v2)}")
-                        self.res_find_key.append({k2:v2})
+                yield text
+                # If we want to show what contains the searched key:
+                # if isinstance(v, numbers.Number) or isinstance(v,str):
+                #     #print(v)
+                #     #self.res_find_key.append(v)
+                #     yield text, v
+                # else:
+                #     for k2,v2 in get_iterator(v):
+                #         print(f"Key: {k2}, -- Value: {return_only_number_or_text(v2)}")
+                #         self.res_find_key.append({k2:v2})
             else:
-                self._find_str_in_key(v,key, path=path + [k])
+                self._find_str_in_key(v, key, path=path + [k])
 
     ############################# GET VAL #############################
     def get_val(self, key, exact=False):
@@ -119,7 +125,8 @@ class DictExplore():
         self._max_gen_levels = max_level
 
         if self._wl is None:
-            self._wl = get_word_list()
+            #self._wl = get_word_list()
+            self._wl = ["caviar", "loutre", "flûte", "pâté", "pirouette", "cacahuète"]
             self._Nwl = len(self._wl)
 
         return self._random_generation(0)
@@ -176,10 +183,10 @@ class DictExplore():
 
 ############################# HELPER FUNCTIONS #############################
 def get_iterator(obj):
-    if isinstance(obj,dict):
+    if isinstance(obj, dict):
         iterator = (obj.items())
-    elif isinstance(obj,list) or isinstance(obj,np.ndarray):
-        iterator = ((str(k),v) for (k,v) in enumerate(obj))
+    elif isinstance(obj, list) or isinstance(obj,np.ndarray):
+        iterator = ((str(k), v) for (k, v) in enumerate(obj))
     else:
         iterator = ()
     return iterator
@@ -209,7 +216,7 @@ if __name__ == "__main__":
     dx = DictExplore(dico)
     dx.display()
 
-    dx.find_key("L3", exact=True)
+    #dx.find_key("L3", exact=True)
 
     keys = dx.find_key("L3", get=True)
     vals = dx.get_val("2")
