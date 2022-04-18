@@ -1,5 +1,6 @@
 import numbers
 from typing import Dict, Generator
+from helper_functions import boldize, get_iterator, return_only_number_or_text
 
 
 class Match:
