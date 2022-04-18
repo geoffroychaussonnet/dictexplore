@@ -1,11 +1,12 @@
 import numpy as np
 from typing import List, Dict
 from match_handler import Match, MatchHandler
+from helper_functions import get_iterator, return_only_number_or_text
 
 
 class DictExplore:
 
-    def __init__(self, dico: dict=None):
+    def __init__(self, dico: dict = None):
         self.d = dico
 
         self._eq = self._null_function
